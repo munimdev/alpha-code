@@ -1,7 +1,7 @@
 import * as readline from "readline";
 import chalk from "chalk";
 import { discoverSkills } from "./skills/discovery.js";
-import type { SkillMetadata } from "./skills/types.js";
+import { matchSkill } from "./skills/matcher.js";
 
 export async function startRepl(skillsDir: string): Promise<void> {
     console.log(chalk.cyan("\nAlpha Code Agent"));
@@ -40,12 +40,22 @@ export async function startRepl(skillsDir: string): Promise<void> {
                 return;
             }
 
-            // TODO: Milestone 3 - Match skills to user input
+            const matchResult = await matchSkill(trimmed, skills);
+
+            if (matchResult.skill) {
+                console.log(
+                    chalk.blue(`\n[Matched skill: ${matchResult.skill.name}]`)
+                );
+                console.log(chalk.gray(`Reasoning: ${matchResult.reasoning}`));
+            } else {
+                console.log(chalk.gray(`\n[No skill matched: ${matchResult.reasoning}]`));
+            }
+
             // TODO: Milestone 4 - Execute with Claude
 
             console.log(
                 chalk.yellow(
-                    "\nAgent: [Not yet implemented - will respond in Milestone 4]\n"
+                    "Agent: [Execution not yet implemented - will respond in Milestone 4]\n"
                 )
             );
 
