@@ -1,10 +1,24 @@
 import * as readline from "readline";
 import chalk from "chalk";
+import { discoverSkills } from "./skills/discovery.js";
+import type { SkillMetadata } from "./skills/types.js";
 
 export async function startRepl(skillsDir: string): Promise<void> {
     console.log(chalk.cyan("\nAlpha Code Agent"));
     console.log(chalk.gray(`Skills directory: ${skillsDir}`));
-    console.log(chalk.gray('Type "exit" or press Ctrl+C to quit.\n'));
+
+    const skills = await discoverSkills(skillsDir);
+
+    if (skills.length === 0) {
+        console.log(chalk.yellow("No skills found."));
+    } else {
+        console.log(chalk.green(`Discovered ${skills.length} skill(s):`));
+        for (const skill of skills) {
+            console.log(chalk.gray(`  - ${skill.name}: ${skill.description}`));
+        }
+    }
+
+    console.log(chalk.gray('\nType "exit" or press Ctrl+C to quit.\n'));
 
     const rl = readline.createInterface({
         input: process.stdin,
@@ -26,7 +40,6 @@ export async function startRepl(skillsDir: string): Promise<void> {
                 return;
             }
 
-            // TODO: Milestone 2 - Discover skills
             // TODO: Milestone 3 - Match skills to user input
             // TODO: Milestone 4 - Execute with Claude
 
