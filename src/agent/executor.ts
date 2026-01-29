@@ -1,3 +1,4 @@
+import * as path from "path";
 import Anthropic from "@anthropic-ai/sdk";
 import { getClient } from "../client.js";
 import { getFullSkillContent } from "../skills/parser.js";
@@ -22,12 +23,20 @@ export async function execute(options: ExecuteOptions): Promise<string> {
 
     if (skill) {
         const skillContent = await getFullSkillContent(skill.path);
+        const skillDir = path.dirname(skill.path);
+
         systemPrompt = `You are a helpful coding assistant. You have access to tools that let you read files, write files, list directories, and run shell commands.
 
-The following skill has been activated to help with this request:
+The following skill has been activated. Its instructions are in the XML block below. The skill directory is at: ${skillDir}
+You can load reference files (references/), run scripts (scripts/), or use assets (assets/) by passing paths relative to that directory to read_file or run_shell (e.g. read_file "${skillDir}/references/REFERENCE.md", or run_shell with cd to that directory).
 
-<skill name="${skill.name}">
+<skill>
+  <name>${skill.name}</name>
+  <description>Activated for this request</description>
+  <location>${skill.path}</location>
+  <instructions>
 ${skillContent}
+  </instructions>
 </skill>
 
 Follow the skill's instructions to help the user. Use tools as needed.`;

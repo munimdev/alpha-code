@@ -41,9 +41,18 @@ export async function matchSkill(
         return { skill: null, reasoning: "No skills available" };
     }
 
-    const skillList = skills
-        .map((s, i) => `${i + 1}. ${s.name}: ${s.description}`)
-        .join("\n");
+    const availableSkillsXml = `<available_skills>
+${skills
+    .map(
+        (s, i) =>
+            `  <skill index="${i + 1}">
+    <name>${s.name}</name>
+    <description>${s.description}</description>
+    <location>${s.path}</location>
+  </skill>`
+    )
+    .join("\n")}
+</available_skills>`;
 
     const response = await getClient().messages.create({
         model: "claude-sonnet-4-20250514",
@@ -51,17 +60,16 @@ export async function matchSkill(
         messages: [
             {
                 role: "user",
-                content: `You are a skill matcher. Given a user request and a list of available skills, determine which skill (if any) should be used.
+                content: `You are a skill matcher. Given a user request and a list of available skills (in XML), determine which skill (if any) should be used.
 
-Available skills:
-${skillList}
+${availableSkillsXml}
 
 User request: "${userPrompt}"
 
 Respond with JSON only, no markdown:
 {"skill_index": <number or null>, "reasoning": "<brief explanation>"}
 
-If no skill matches, use skill_index: null.`,
+Use the skill's index attribute. If no skill matches, use skill_index: null.`,
             },
         ],
     });
