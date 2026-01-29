@@ -2,6 +2,7 @@ import * as readline from "readline";
 import chalk from "chalk";
 import { discoverSkills } from "./skills/discovery.js";
 import { matchSkill } from "./skills/matcher.js";
+import { execute } from "./agent/executor.js";
 
 export async function startRepl(skillsDir: string): Promise<void> {
     console.log(chalk.cyan("\nAlpha Code Agent"));
@@ -40,24 +41,46 @@ export async function startRepl(skillsDir: string): Promise<void> {
                 return;
             }
 
-            const matchResult = await matchSkill(trimmed, skills);
+            try {
+                const matchResult = await matchSkill(trimmed, skills);
 
-            if (matchResult.skill) {
-                console.log(
-                    chalk.blue(`\n[Matched skill: ${matchResult.skill.name}]`)
-                );
-                console.log(chalk.gray(`Reasoning: ${matchResult.reasoning}`));
-            } else {
-                console.log(chalk.gray(`\n[No skill matched: ${matchResult.reasoning}]`));
+                if (matchResult.skill) {
+                    console.log(
+                        chalk.blue(`\n[Matched skill: ${matchResult.skill.name}]`)
+                    );
+                    console.log(chalk.gray(`Reasoning: ${matchResult.reasoning}\n`));
+                } else {
+                    console.log(chalk.gray(`\n[No skill matched]\n`));
+                }
+
+                process.stdout.write(chalk.cyan("Agent: "));
+
+                await execute({
+                    userPrompt: trimmed,
+                    skill: matchResult.skill,
+                    onText: (text) => {
+                        process.stdout.write(text);
+                    },
+                    onToolUse: (toolName, toolInput) => {
+                        console.log(
+                            chalk.magenta(`\n[Using tool: ${toolName}]`)
+                        );
+                        console.log(chalk.gray(JSON.stringify(toolInput, null, 2)));
+                    },
+                    onToolResult: (toolName, result) => {
+                        const truncated =
+                            result.length > 500
+                                ? result.slice(0, 500) + "...(truncated)"
+                                : result;
+                        console.log(chalk.gray(`[${toolName} result]: ${truncated}\n`));
+                        process.stdout.write(chalk.cyan("Agent: "));
+                    },
+                });
+
+                console.log("\n");
+            } catch (error) {
+                console.error(chalk.red(`\nError: ${(error as Error).message}\n`));
             }
-
-            // TODO: Milestone 4 - Execute with Claude
-
-            console.log(
-                chalk.yellow(
-                    "Agent: [Execution not yet implemented - will respond in Milestone 4]\n"
-                )
-            );
 
             prompt();
         });
