@@ -1,23 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { getClient } from "../client.js";
 import type { SkillMetadata } from "./types.js";
 
 export interface MatchResult {
     skill: SkillMetadata | null;
     reasoning: string;
-}
-
-let client: Anthropic | null = null;
-
-function getClient(): Anthropic {
-    if (!client) {
-        if (!process.env.ANTHROPIC_API_KEY) {
-            throw new Error(
-                "ANTHROPIC_API_KEY environment variable is not set"
-            );
-        }
-        client = new Anthropic();
-    }
-    return client;
 }
 
 export function parseMatchResponse(
