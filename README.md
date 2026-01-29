@@ -67,7 +67,7 @@ Agent: [Uses git log tool, generates formatted changelog...]
 
 ## Using External Skills
 
-This CLI is compatible with any skill following the [Agent Skills specification](https://agentskills.io/specification). Skills can include optional `references/`, `scripts/`, and `assets/` directories; the agent is given the skill path so it can load those via `read_file` or `run_shell`.
+This CLI is compatible with any skill following the [Agent Skills specification](https://agentskills.io/specification), including community skills from [github.com/langbaseinc/agent-skills](https://github.com/langbaseinc/agent-skills). Skills can include optional `references/`, `scripts/`, and `assets/` directories; the agent is given the skill path so it can load those via `read_file` or `run_shell`.
 
 **Adding community skills to Alpha Code**
 
