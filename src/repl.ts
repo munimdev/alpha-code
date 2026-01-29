@@ -90,26 +90,42 @@ export async function startRepl(skillsDir: string): Promise<void> {
 
                 const streamOut = createBufferedStdout();
                 let thinkingShown = false;
+                let thinkingStreamingStarted = false;
 
                 const result = await execute({
                     userPrompt: trimmed,
                     skill: matchResult.skill,
                     initialMessages: conversationHistory,
-                    onThinking: () => {
-                        if (!thinkingShown) {
-                            thinkingShown = true;
-                            process.stdout.write(chalk.gray("Thinking..."));
+                    onThinking: (delta) => {
+                        if (delta === undefined) {
+                            thinkingStreamingStarted = false;
+                            if (!thinkingShown) {
+                                thinkingShown = true;
+                                process.stdout.write(chalk.gray("Thinking..."));
+                            }
+                        } else {
+                            if (!thinkingStreamingStarted) {
+                                thinkingStreamingStarted = true;
+                                clearStatusLine();
+                                process.stdout.write(chalk.gray("Thinking: "));
+                            }
+                            process.stdout.write(delta);
                         }
                     },
                     onStreamingStart: () => {
-                        clearStatusLine();
+                        if (thinkingStreamingStarted) {
+                            process.stdout.write("\n");
+                        } else {
+                            clearStatusLine();
+                        }
                         process.stdout.write(chalk.cyan("Agent: "));
                     },
                     onText: (text) => {
                         streamOut.write(text);
                     },
                     onToolUse: (toolName, toolInput) => {
-                        clearStatusLine();
+                        streamOut.flush();
+                        process.stdout.write("\n");
                         const arg =
                             toolInput.path ?? toolInput.command ?? JSON.stringify(toolInput);
                         console.log(chalk.magenta(`[Tool: ${toolName}]`) + chalk.gray(` ${String(arg).slice(0, 80)}${String(arg).length > 80 ? "..." : ""}`));
@@ -120,7 +136,6 @@ export async function startRepl(skillsDir: string): Promise<void> {
                                 ? result.slice(0, 200) + "..."
                                 : result;
                         console.log(chalk.gray(`  -> ${truncated.replace(/\n/g, " ")}\n`));
-                        process.stdout.write(chalk.cyan("Agent: "));
                     },
                 });
 

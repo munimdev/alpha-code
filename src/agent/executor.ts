@@ -16,7 +16,7 @@ export interface ExecuteOptions {
     onText?: (text: string) => void;
     onToolUse?: (toolName: string, input: Record<string, unknown>) => void;
     onToolResult?: (toolName: string, result: string) => void;
-    onThinking?: () => void;
+    onThinking?: (delta?: string) => void;
     onStreamingStart?: () => void;
 }
 
@@ -91,6 +91,10 @@ Follow the skill's instructions to help the user. Use tools as needed.`;
 
         let firstText = true;
 
+        stream.on("thinking", (delta: string) => {
+            onThinking?.(delta);
+        });
+
         stream.on("text", (delta: string) => {
             if (firstText) {
                 firstText = false;
@@ -134,7 +138,12 @@ Follow the skill's instructions to help the user. Use tools as needed.`;
             }
         }
 
-        messages.push({ role: "assistant", content: assistantContent });
+        const content =
+            assistantContent.length > 0
+                ? assistantContent
+                : ([{ type: "text" as const, text: "." }] satisfies ContentBlockParam[]);
+
+        messages.push({ role: "assistant", content });
 
         if (toolResults.length > 0) {
             messages.push({ role: "user", content: toolResults });
