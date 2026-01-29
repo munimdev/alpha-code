@@ -17,9 +17,15 @@ A mini coding agent CLI that implements the [Agent Skills](https://agentskills.i
 # Install dependencies
 npm install
 
-# Set your Anthropic API key
+# Set your Anthropic API key (either in .env or export)
+# Option 1: Create .env in project root
+echo "ANTHROPIC_API_KEY=your_api_key_here" > .env
+
+# Option 2: Export in shell
 export ANTHROPIC_API_KEY=your_api_key_here
 ```
+
+The CLI loads `.env` automatically and accepts either `ANTHROPIC_API_KEY` or `ANTHROPIC_KEY`.
 
 ## Usage
 
