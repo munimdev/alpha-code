@@ -1,4 +1,4 @@
-import { getClient } from "../client.js";
+import { getClient, getModel } from "../client.js";
 import type { SkillMetadata } from "./types.js";
 
 export interface MatchResult {
@@ -55,7 +55,7 @@ ${skills
 </available_skills>`;
 
     const response = await getClient().messages.create({
-        model: "claude-sonnet-4-20250514",
+        model: getModel(),
         max_tokens: 256,
         messages: [
             {

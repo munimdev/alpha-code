@@ -2,6 +2,12 @@ import Anthropic from "@anthropic-ai/sdk";
 
 let client: Anthropic | null = null;
 
+const DEFAULT_MODEL = "claude-sonnet-4-20250514";
+
+export function getModel(): string {
+    return DEFAULT_MODEL;
+}
+
 function getApiKey(): string | undefined {
     return (
         process.env.ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_KEY
